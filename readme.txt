@@ -40,6 +40,7 @@ This plugin uses a Webservice. Please be advised :
 
 = Updates =
 The blacklist will be updated as often as possible, we expect to release weekly updates.
+You can choose to automatically download the blacklist once a day.
 You can choose to filter all connexions or only the first of every session.
 Webmasters are encouraged to submit spammy URLs to help us improve the blacklist (see FAQ).
 
@@ -69,6 +70,11 @@ Of course ! Simply send an email to the author ( didier@didcode.com ) - explain 
 fingers. Good things DO happen !
 
 == Changelog ==
+= 1.2 =
+*Release Date : 02 january 2015*
+
+Added an option : blacklist daily auto-update - Fire & Forget !
+
 = 1.0 =
 *Release Date : 23 december 2014*
 

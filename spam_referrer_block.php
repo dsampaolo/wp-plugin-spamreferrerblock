@@ -3,7 +3,7 @@
 Plugin Name: SpamReferrerBlock
 Plugin URI:
 Description:
-Version: 1.1
+Version: 1.2
 Author: Didier Sampaolo
 Author URI: http://www.didcode.com/
 */
@@ -133,6 +133,5 @@ class SpamReferrerBlock
  *
  * récupérer le delta de la blacklist
  * soumettre de nouvelles URLs à la blacklist (webservice)
- * wp_option: un seul check par session
  *
  */
