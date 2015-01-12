@@ -1,0 +1,21 @@
+
+
+.srb_success {
+    background-color:#DDFFDD;
+    border:solid 1px #99CC99;
+}
+
+.srb_error {
+    background-color:#FFDDDD;
+    border:solid 1px #FF9999;
+}
+
+.srb_warning {
+    background-color: #fffebb;
+    border:solid 1px #ffff00;
+}
+
+.srb_info {
+    background-color: #d4faff;
+    border:solid 1px #0016ff;
+}
