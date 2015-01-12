@@ -70,6 +70,11 @@ Of course ! Simply send an email to the author ( didier@didcode.com ) - explain 
 fingers. Good things DO happen !
 
 == Changelog ==
+
+= 2.0 =
+Added colors to the blacklist to let you know if the plugin is effective against a domain
+Added options to customize HTTP response code (404, 301...)
+
 = 1.2 =
 *Release Date : 02 january 2015*
 

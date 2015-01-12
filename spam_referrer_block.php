@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: SpamReferrerBlock
-Plugin URI:
-Description:
-Version: 1.2
+Plugin URI: https://wordpress.org/plugins/spamreferrerblock/
+Description: Filters your traffic to block hits with false referrers.
+Version: 2.0
 Author: Didier Sampaolo
 Author URI: http://www.didcode.com/
 */
@@ -16,15 +16,16 @@ class SpamReferrerBlock
     {
         global $wpdb;
 
-        $this->version = '1.0';
+        $this->version = '2.0';
         $this->table_name = $wpdb->prefix . 'srb_blacklist';
 
-        register_activation_hook( __FILE__, array($this, 'create_table') );
+        register_activation_hook( __FILE__, array($this, 'setup_db') );
 
         if(!is_admin()) {
             add_action('init', array($this, 'filter_trafic'));
         } else {
             add_action('admin_menu', array($this, 'add_menu'));
+
         }
     }
 
@@ -33,24 +34,31 @@ class SpamReferrerBlock
     }
 
     function show_admin_page() {
+        wp_enqueue_style( 'srb_admin_style', plugin_dir_url( __FILE__ ).'admin_style.css?v='.$this->version);
         include('admin_page.php');
     }
 
-    function create_table() {
+    function setup_db() {
         global $wpdb;
 
         $charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS $this->table_name (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            item varchar(255) DEFAULT '' NOT NULL,
-            UNIQUE KEY id (id),
-            UNIQUE (item)
-        ) $charset_collate;";
+        $installed_ver = get_option( "srb_db_version" );
 
-        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-        dbDelta( $sql );
-        add_option( 'srb_db_version', $this->version );
+        if ( $installed_ver != $this->version ) {
+            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+            $sql = "CREATE TABLE $this->table_name (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                item varchar(255) DEFAULT '' NOT NULL,
+                works tinyint(1),
+                UNIQUE KEY id (id),
+                UNIQUE (item)
+            ) $charset_collate;";
+
+            dbDelta($sql);
+            update_option('srb_db_version', $this->version);
+        }
 
         $this->download_blacklist();
     }
@@ -60,11 +68,19 @@ class SpamReferrerBlock
         if ( $last_download === false || (date('U') - $last_download) > 900 || true) {
 
            global $wpdb;
-           $url = 'http://www.didcode.com/srb-blacklist-delta.php?updated_at='.get_option( 'srb_blacklist_dl_time' );
+           $url = 'http://www.didcode.com/srb-blacklist-delta.php?version='.$this->version.'&updated_at='.get_option( 'srb_blacklist_dl_time' );
            $items = json_decode(file_get_contents($url));
-           foreach($items as $item) {
+
+            foreach($items as $item => $status) {
                 $esc_item = esc_sql($item);
-                $sql = "INSERT IGNORE INTO $this->table_name (item) VALUE ('$esc_item')";
+                $esc_status = esc_sql($status);
+
+                $already = $wpdb->get_row("SELECT * from $this->table_name where item = '$esc_item'");
+                if ($already == null) {
+                    $sql = "INSERT IGNORE INTO $this->table_name (item, works) VALUE ('$esc_item', '$esc_status')";
+                } else {
+                    $sql = "UPDATE $this->table_name SET item = '$esc_item', works = '$esc_status' WHERE item = '$esc_item' LIMIT 1";
+                }
                 $wpdb->query($sql);
            }
            $this->updateBlacklistDownloadTime();
@@ -104,9 +120,20 @@ class SpamReferrerBlock
             $ref = $_SERVER['HTTP_REFERER'];
 
             foreach($this->blacklist() as $spammer) {
-                if (strpos($ref, $spammer) !== false) {
-                    header("HTTP/1.0 405 Method Not Allowed");
-                    die();
+                if (strpos($ref, $spammer->item) !== false) {
+                    $response    = get_option('srb_response');
+                    $redirection = get_option('srb_redirection');
+
+                    if ($response == 301 || $response == 302) {
+                        header('Location:'.$redirection, true, $response );
+                        die();
+                    } elseif ($response == 404) {
+                        header("HTTP/1.0 405 Method Not Allowed");
+                        die();
+                    } elseif ($response == 404) {
+                        header("HTTP/1.0 404 Not Found");
+                        die();
+                    }
                 }
             }
         }
@@ -118,20 +145,8 @@ class SpamReferrerBlock
         $array = '';
 
         global $wpdb;
-        $items = $wpdb->get_results("SELECT item FROM $this->table_name");
+        $items = $wpdb->get_results("SELECT * FROM $this->table_name order by item");
 
-        foreach($items as $item) {
-            $array[] = $item->item;
-        }
-
-        return $array;
+        return $items;
     }
 }
-
-/*
- * TODO
- *
- * récupérer le delta de la blacklist
- * soumettre de nouvelles URLs à la blacklist (webservice)
- *
- */
