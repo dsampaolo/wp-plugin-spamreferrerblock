@@ -96,6 +96,15 @@ class SpamReferrerBlock
         }
     }
 
+    function save_custom_blacklist() {
+        $blacklist = explode("\n", trim($_POST['srb_custom_blacklist']));
+        global $wpdb;
+        foreach($blacklist as $item) {
+            $esc_item = esc_sql($item);
+            $wpdb->query("INSERT IGNORE INTO $this->table_name (item) VALUE ('$esc_item')");
+        }
+    }
+
     function updateBlacklistDownloadTime() {
         $option_name = 'srb_blacklist_dl_time';
         $new_value = date('U') ;
