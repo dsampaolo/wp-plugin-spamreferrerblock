@@ -89,6 +89,13 @@ if ($last_download !== false) {
 
 
         <?php submit_button('Save','button button-primary','srb_save_options') ?>
+        
+        <hr />
+
+        <h3>Custom Blacklist</h3>
+            <textarea rows="10" cols="60" name="srb_custom_blacklist"></textarea>
+            <?php submit_button('Save','button button-primary','srb_blacklist_custom_save') ?>
+        
         <hr />
 
         <h3>Blacklist</h3>
