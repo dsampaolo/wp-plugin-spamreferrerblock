@@ -1,21 +1,12 @@
-
-
 .srb_success {
-    background-color:#DDFFDD;
-    border:solid 1px #99CC99;
+    background-color:#e5FFe5;
 }
-
 .srb_error {
-    background-color:#FFDDDD;
-    border:solid 1px #FF9999;
+    background-color:#FFE5E5;
 }
-
 .srb_warning {
-    background-color: #fffebb;
-    border:solid 1px #ffff00;
+    background-color: #fff9e5;
 }
-
 .srb_info {
     background-color: #d4faff;
-    border:solid 1px #0016ff;
 }
